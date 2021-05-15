@@ -3,9 +3,11 @@ package com.lowvision.ocr
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 
-class SplashScreen : AppCompatActivity() {
+class TextActivity : AppCompatActivity() {
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_splash_screen)
+        setContentView(R.layout.activity_text)
+
     }
 }
