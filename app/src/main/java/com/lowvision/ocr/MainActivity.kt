@@ -2,33 +2,26 @@ package com.lowvision.ocr
 
 
 import android.Manifest
+import android.annotation.SuppressLint
+import android.content.Intent
 import android.content.pm.PackageManager
-import android.net.Uri
 import android.os.Bundle
 import android.util.Log
-import android.view.View
-import android.widget.Button
-import android.widget.ImageView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
-import androidx.camera.core.CameraSelector
-import androidx.camera.core.ImageCapture
-import androidx.camera.core.ImageCaptureException
-import androidx.camera.core.Preview
+import androidx.camera.core.*
 import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
+import com.google.mlkit.vision.common.InputImage
+import com.google.mlkit.vision.text.TextRecognition
 import kotlinx.android.synthetic.main.activity_main.*
-import java.io.File
-import java.text.SimpleDateFormat
-import java.util.*
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
 
 class MainActivity : AppCompatActivity() {
 
     private var imageCapture: ImageCapture? = null
-    private lateinit var outputDirectory: File
     private lateinit var cameraExecutor: ExecutorService
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -48,10 +41,11 @@ class MainActivity : AppCompatActivity() {
 
         // set on click listener for the button of capture photo
         // it calls a method which is implemented below
-        findViewById<Button>(R.id.camera_capture_button).setOnClickListener {
+        camera_capture_button.setOnClickListener {
             takePhoto()
+
         }
-        outputDirectory = getOutputDirectory()
+
         cameraExecutor = Executors.newSingleThreadExecutor()
     }
 
@@ -61,38 +55,40 @@ class MainActivity : AppCompatActivity() {
         // modifiable image capture use case
         val imageCapture = imageCapture ?: return
 
-        // Create time-stamped output file to hold the image
-        val photoFile = File(
-            outputDirectory,
-            SimpleDateFormat(FILENAME_FORMAT, Locale.US).format(System.currentTimeMillis()) + ".jpg"
-        )
-
-        // Create output options object which contains file + metadata
-        val outputOptions = ImageCapture.OutputFileOptions.Builder(photoFile).build()
-
         // Set up image capture listener,
-        // which is triggered after photo has
-        // been taken
+        // which is triggered after photo has been taken
         imageCapture.takePicture(
-            outputOptions,
             ContextCompat.getMainExecutor(this),
-            object : ImageCapture.OnImageSavedCallback {
+            object : ImageCapture.OnImageCapturedCallback() {
+
                 override fun onError(exc: ImageCaptureException) {
                     Log.e(TAG, "Photo capture failed: ${exc.message}", exc)
                 }
 
-                override fun onImageSaved(output: ImageCapture.OutputFileResults) {
-                    val savedUri = Uri.fromFile(photoFile)
+                @SuppressLint("UnsafeOptInUsageError")
+                override fun onCaptureSuccess(imageProxy: ImageProxy) {
+                    val image: InputImage = InputImage.fromMediaImage(
+                        imageProxy.image!!,
+                        imageProxy.imageInfo.rotationDegrees
+                    )
 
-                    // set the saved uri to the image view
-                    findViewById<ImageView>(R.id.iv_capture).visibility = View.VISIBLE
-                    findViewById<ImageView>(R.id.iv_capture).setImageURI(savedUri)
+                    val recognizer = TextRecognition.getClient()
 
-                    val msg = "Photo capture succeeded: $savedUri"
-                    Toast.makeText(baseContext, msg, Toast.LENGTH_LONG).show()
-                    Log.d(TAG, msg)
+                    val result = recognizer.process(image)
+                        .addOnSuccessListener { visionText ->
+                            // Task completed successfully
+
+                            val intent = Intent(this@MainActivity, TextActivity::class.java)
+                            intent.putExtra(photoResult, visionText.text)
+                            startActivity(intent)
+
+                        }
+                        .addOnFailureListener { e ->
+                            // Task failed with an exception
+                        }
                 }
             })
+
     }
 
     private fun startCamera() {
@@ -103,7 +99,6 @@ class MainActivity : AppCompatActivity() {
             // Used to bind the lifecycle of cameras to the lifecycle owner
             val cameraProvider: ProcessCameraProvider = cameraProviderFuture.get()
 
-            // Preview
             val preview = Preview.Builder()
                 .build()
                 .also {
@@ -135,15 +130,6 @@ class MainActivity : AppCompatActivity() {
         ContextCompat.checkSelfPermission(baseContext, it) == PackageManager.PERMISSION_GRANTED
     }
 
-    // creates a folder inside internal storage
-    private fun getOutputDirectory(): File {
-        val mediaDir = externalMediaDirs.firstOrNull()?.let {
-            File(it, resources.getString(R.string.app_name)).apply { mkdirs() }
-        }
-        return if (mediaDir != null && mediaDir.exists())
-            mediaDir else filesDir
-    }
-
     // checks the camera permission
     override fun onRequestPermissionsResult(
         requestCode: Int, permissions: Array<String>, grantResults:
@@ -165,8 +151,8 @@ class MainActivity : AppCompatActivity() {
     }
 
     companion object {
-        private const val TAG = "CameraXGFG"
-        private const val FILENAME_FORMAT = "yyyy-MM-dd-HH-mm-ss-SSS"
+        const val photoResult: String = "photo_result"
+        private const val TAG = "CameraX"
         private const val REQUEST_CODE_PERMISSIONS = 20
         private val REQUIRED_PERMISSIONS = arrayOf(Manifest.permission.CAMERA)
     }
@@ -175,4 +161,5 @@ class MainActivity : AppCompatActivity() {
         super.onDestroy()
         cameraExecutor.shutdown()
     }
+
 }
