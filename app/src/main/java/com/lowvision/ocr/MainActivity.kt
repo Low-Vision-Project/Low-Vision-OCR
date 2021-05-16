@@ -1,6 +1,4 @@
 package com.lowvision.ocr
-
-
 import android.Manifest
 import android.annotation.SuppressLint
 import android.app.Activity
@@ -75,7 +73,7 @@ class MainActivity : AppCompatActivity() {
         cameraExecutor = Executors.newSingleThreadExecutor()
     }
 
-    fun readFromGallery(uri: Uri) {
+    private fun readFromGallery(uri: Uri) {
         val image: InputImage
         try {
             image = InputImage.fromFilePath(baseContext, uri)
@@ -100,19 +98,19 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    fun flash() {
+    private fun flash() {
         if (flashToggle.isSelected) {
-            camera!!.cameraControl.enableTorch(true)
-            flashToggle.isSelected = true
+            camera!!.cameraControl.enableTorch(false)
+            flashToggle.isSelected = false
             flashToggle.setImageResource(R.drawable.ic_baseline_flash_off_24)
         } else {
-            flashToggle.isSelected = false
-            camera!!.cameraControl.enableTorch(false)
+            flashToggle.isSelected = true
+            camera!!.cameraControl.enableTorch(true)
             flashToggle.setImageResource(R.drawable.ic_baseline_flash_on_24)
         }
     }
 
-    fun accessGallery() {
+    private fun accessGallery() {
         val pickIntent = Intent(Intent.ACTION_PICK)
         pickIntent.setDataAndType(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, "image/*")
         try {
