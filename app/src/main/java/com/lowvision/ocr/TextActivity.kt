@@ -20,15 +20,15 @@ class TextActivity : AppCompatActivity() , TextToSpeech.OnInitListener{
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_text)
+        tts = TextToSpeech(this, this)
         seekbar()
         spinnerBox()
         // Get The Text
         val resultText = intent.getStringExtra("photo_result")
         resultTextView.text = resultText
         readButton.setOnClickListener{
-            if (resultText != null) {
-                speakOut(resultText)
-            }
+            Log.e("result",resultText!!)
+                speakOut(resultText!!)
         }
 
 
