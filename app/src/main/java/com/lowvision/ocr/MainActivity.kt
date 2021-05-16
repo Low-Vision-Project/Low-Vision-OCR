@@ -29,35 +29,36 @@ class MainActivity : AppCompatActivity() {
     private var imageCapture: ImageCapture? = null
     private lateinit var cameraExecutor: ExecutorService
     private var imageUri: Uri? = null
-    private var camera :Camera? = null
+    private var camera: Camera? = null
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
         //Gallery Access
         galleryButton.setOnClickListener {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M){
-                if (checkSelfPermission(Manifest.permission.READ_EXTERNAL_STORAGE)==PackageManager.PERMISSION_DENIED){
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                if (checkSelfPermission(Manifest.permission.READ_EXTERNAL_STORAGE) == PackageManager.PERMISSION_DENIED) {
                     val permissions = arrayOf(Manifest.permission.READ_EXTERNAL_STORAGE)
                     requestPermissions(permissions, REQUEST_CODE_PERMISSIONS_GALLERY)
-                } else{
-                    accessGallery();
+                } else {
+                    accessGallery()
                 }
-            }else{
-                accessGallery();
+            } else {
+                accessGallery()
             }
 
         }
 
-
-        // hide the action bar
-        supportActionBar?.hide()
 
         // Check camera permissions if all permission granted
         // start camera else ask for the permission
         if (allPermissionsGranted()) {
             startCamera()
         } else {
-            ActivityCompat.requestPermissions(this, REQUIRED_PERMISSIONS, REQUEST_CODE_PERMISSIONS_CAMERA)
+            ActivityCompat.requestPermissions(
+                this,
+                REQUIRED_PERMISSIONS,
+                REQUEST_CODE_PERMISSIONS_CAMERA
+            )
         }
 
         // set on click listener for the button of capture photo
@@ -67,13 +68,14 @@ class MainActivity : AppCompatActivity() {
 
         }
         flashToggle.setOnClickListener {
-            Log.e("ddasddas","fdskl")
+            Log.e("ddasddas", "fdskl")
             flash()
         }
 
         cameraExecutor = Executors.newSingleThreadExecutor()
     }
-    fun readFromGallery(uri:Uri){
+
+    fun readFromGallery(uri: Uri) {
         val image: InputImage
         try {
             image = InputImage.fromFilePath(baseContext, uri)
@@ -97,26 +99,26 @@ class MainActivity : AppCompatActivity() {
             e.printStackTrace()
         }
     }
-    fun flash(){
-            if (flashToggle.isSelected) {
-                camera!!.cameraControl.enableTorch(true)
-                flashToggle.isSelected = true
-                flashToggle.setImageResource(R.drawable.ic_baseline_flash_off_24)
-            } else {
-                flashToggle.isSelected = false
-                camera!!.cameraControl.enableTorch(false)
-                flashToggle.setImageResource(R.drawable.ic_baseline_flash_on_24)
-            }
+
+    fun flash() {
+        if (flashToggle.isSelected) {
+            camera!!.cameraControl.enableTorch(true)
+            flashToggle.isSelected = true
+            flashToggle.setImageResource(R.drawable.ic_baseline_flash_off_24)
+        } else {
+            flashToggle.isSelected = false
+            camera!!.cameraControl.enableTorch(false)
+            flashToggle.setImageResource(R.drawable.ic_baseline_flash_on_24)
+        }
     }
 
-    fun accessGallery(){
+    fun accessGallery() {
         val pickIntent = Intent(Intent.ACTION_PICK)
         pickIntent.setDataAndType(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, "image/*")
         try {
             startActivityForResult(pickIntent, REQUEST_CODE_PERMISSIONS_IMAGE)
 
-        }
-        catch (e: Exception){
+        } catch (e: Exception) {
         }
     }
 
@@ -186,7 +188,7 @@ class MainActivity : AppCompatActivity() {
 
                 // Bind use cases to camera
 
-                 camera= cameraProvider.bindToLifecycle(
+                camera = cameraProvider.bindToLifecycle(
                     this, cameraSelector, preview, imageCapture
                 )
 
@@ -197,7 +199,6 @@ class MainActivity : AppCompatActivity() {
 
         }, ContextCompat.getMainExecutor(this))
     }
-
 
 
     private fun allPermissionsGranted() = REQUIRED_PERMISSIONS.all {
@@ -221,19 +222,19 @@ class MainActivity : AppCompatActivity() {
                     .show()
                 finish()
             }
-        }
-        else if(requestCode == REQUEST_CODE_PERMISSIONS_CAMERA){
-            if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED){
+        } else if (requestCode == REQUEST_CODE_PERMISSIONS_CAMERA) {
+            if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                 accessGallery()
-            }else{
-                Toast.makeText(this,"Permission denied", Toast.LENGTH_SHORT).show()
+            } else {
+                Toast.makeText(this, "Permission denied", Toast.LENGTH_SHORT).show()
             }
         }
 
     }
+
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
-        if(requestCode == REQUEST_CODE_PERMISSIONS_IMAGE && resultCode == Activity.RESULT_OK){
+        if (requestCode == REQUEST_CODE_PERMISSIONS_IMAGE && resultCode == Activity.RESULT_OK) {
             imageUri = data?.data
             imageUri?.let { readFromGallery(it) }
         }
