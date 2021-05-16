@@ -1,4 +1,5 @@
 package com.lowvision.ocr
+
 import android.Manifest
 import android.annotation.SuppressLint
 import android.app.Activity
@@ -66,7 +67,6 @@ class MainActivity : AppCompatActivity() {
 
         }
         flashToggle.setOnClickListener {
-            Log.e("ddasddas", "fdskl")
             flash()
         }
 
@@ -80,7 +80,7 @@ class MainActivity : AppCompatActivity() {
 
             val recognizer = TextRecognition.getClient()
 
-            val result = recognizer.process(image)
+            recognizer.process(image)
                 .addOnSuccessListener { visionText ->
                     // Task completed successfully
 
@@ -91,6 +91,7 @@ class MainActivity : AppCompatActivity() {
                 }
                 .addOnFailureListener { e ->
                     // Task failed with an exception
+                    Log.e("Main Activity", e.toString())
                 }
 
         } catch (e: IOException) {
@@ -144,7 +145,7 @@ class MainActivity : AppCompatActivity() {
 
                     val recognizer = TextRecognition.getClient()
 
-                    val result = recognizer.process(image)
+                    recognizer.process(image)
                         .addOnSuccessListener { visionText ->
                             // Task completed successfully
 
@@ -155,6 +156,7 @@ class MainActivity : AppCompatActivity() {
                         }
                         .addOnFailureListener { e ->
                             // Task failed with an exception
+                            Log.e("Main Activity", e.toString())
                         }
                 }
             })
@@ -164,7 +166,7 @@ class MainActivity : AppCompatActivity() {
     private fun startCamera() {
         val cameraProviderFuture = ProcessCameraProvider.getInstance(this)
 
-        cameraProviderFuture.addListener(Runnable {
+        cameraProviderFuture.addListener({
 
             // Used to bind the lifecycle of cameras to the lifecycle owner
             val cameraProvider: ProcessCameraProvider = cameraProviderFuture.get()

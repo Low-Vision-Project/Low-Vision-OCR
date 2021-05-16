@@ -10,7 +10,7 @@
     <ScrollView
         android:id="@+id/srcTextScrollView"
         android:layout_width="match_parent"
-        android:layout_height="400dp"
+        android:layout_height="520dp"
         android:fillViewport="true"
         android:scrollbars="vertical"
         app:layout_constraintBottom_toBottomOf="parent"
