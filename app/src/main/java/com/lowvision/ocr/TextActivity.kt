@@ -1,6 +1,7 @@
 package com.lowvision.ocr
 
 import android.graphics.Color
+import android.graphics.Typeface
 import android.os.Bundle
 import android.speech.tts.TextToSpeech
 import android.util.Log
@@ -10,11 +11,12 @@ import android.widget.AdapterView
 import android.widget.ArrayAdapter
 import android.widget.SeekBar
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.res.ResourcesCompat
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import kotlinx.android.synthetic.main.activity_text.*
 import java.util.*
 
-class TextActivity : AppCompatActivity() , TextToSpeech.OnInitListener{
+class TextActivity : AppCompatActivity(), TextToSpeech.OnInitListener {
 
     private var tts: TextToSpeech? = null
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -23,24 +25,24 @@ class TextActivity : AppCompatActivity() , TextToSpeech.OnInitListener{
         tts = TextToSpeech(this, this)
         seekbar()
         spinnerBox()
+        spinnerBoxFont()
         // Get The Text
         val resultText = intent.getStringExtra("photo_result")
         resultTextView.text = resultText
-        readButton.setOnClickListener{
-            Log.e("result",resultText!!)
-                speakOut(resultText!!)
+        readButton.setOnClickListener {
+            Log.e("result", resultText!!)
+            speakOut(resultText!!)
         }
-
 
 
         // Back Button On Action Bar
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
-        bottomSheet.clipToOutline=true
+        bottomSheet.clipToOutline = true
         BottomSheetBehavior.from(bottomSheet).apply {
-            peekHeight=100
-            this.state= BottomSheetBehavior.STATE_COLLAPSED
+            peekHeight = 100
+            this.state = BottomSheetBehavior.STATE_COLLAPSED
 
-            val bottomSheetCallback = object : BottomSheetBehavior.BottomSheetCallback() {
+            /*val bottomSheetCallback = object : BottomSheetBehavior.BottomSheetCallback() {
 
                 override fun onStateChanged(bottomSheet: View, newState: Int) {
                     // Do something for new state
@@ -83,13 +85,14 @@ class TextActivity : AppCompatActivity() , TextToSpeech.OnInitListener{
 
                     }
                 }
-            }
-           this.addBottomSheetCallback(bottomSheetCallback)
+            }*/
+            //this.addBottomSheetCallback(bottomSheetCallback)
 
         }
 
     }
-    private fun speakOut(text:String) {
+
+    private fun speakOut(text: String) {
         tts!!.speak(text, TextToSpeech.QUEUE_FLUSH, null, "1")
     }
 
@@ -116,6 +119,7 @@ class TextActivity : AppCompatActivity() , TextToSpeech.OnInitListener{
         }
         super.onDestroy()
     }
+
     private fun seekbar() {
         seekBar.progress = 3
         seekBar.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
@@ -138,6 +142,7 @@ class TextActivity : AppCompatActivity() , TextToSpeech.OnInitListener{
             }
         })
     }
+
     private fun spinnerBox() {
         ArrayAdapter.createFromResource(
             this,
@@ -157,6 +162,7 @@ class TextActivity : AppCompatActivity() , TextToSpeech.OnInitListener{
                 position: Int,
                 id: Long
             ) {
+
                 when (position) {
                     0 -> {
                         resultTextView.setBackgroundColor(Color.WHITE)
@@ -201,6 +207,68 @@ class TextActivity : AppCompatActivity() , TextToSpeech.OnInitListener{
             }
         }
     }
+
+    private fun spinnerBoxFont() {
+        ArrayAdapter.createFromResource(
+            this,
+            R.array.font_string,
+            android.R.layout.simple_spinner_item
+        ).also { adapter ->
+            // Specify the layout to use when the list of choices appears
+            adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+            // Apply the adapter to the spinner
+            spinnerFont.adapter = adapter
+        }
+
+        spinnerFont.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+            override fun onItemSelected(
+                parent: AdapterView<*>?,
+                view: View?,
+                position: Int,
+                id: Long
+            ) {
+
+                when (position) {
+                    0 -> {
+                        val myCustomFont: Typeface? =
+                            ResourcesCompat.getFont(baseContext, R.font.koko_regular)
+                        resultTextView.typeface = myCustomFont
+
+                    }
+                    1 -> {
+                        val myCustomFont: Typeface? =
+                            ResourcesCompat.getFont(baseContext, R.font.roboto_regular)
+                        resultTextView.typeface = myCustomFont
+                    }
+                    2 -> {
+                        val myCustomFont: Typeface? =
+                            ResourcesCompat.getFont(baseContext, R.font.varelaround_regular)
+                        resultTextView.typeface = myCustomFont
+                    }
+                    3 -> {
+                        val myCustomFont: Typeface? =
+                            ResourcesCompat.getFont(baseContext, R.font.opensanscondensed_light)
+                        resultTextView.typeface = myCustomFont
+                    }
+                    4 -> {
+                        val myCustomFont: Typeface? =
+                            ResourcesCompat.getFont(baseContext, R.font.oxygenmono_regular)
+                        resultTextView.typeface = myCustomFont
+                    }
+                    5 -> {
+                        val myCustomFont: Typeface? =
+                            ResourcesCompat.getFont(baseContext, R.font.pt_sans)
+                        resultTextView.typeface = myCustomFont
+                    }
+
+                }
+            }
+
+            override fun onNothingSelected(p0: AdapterView<*>?) {
+            }
+        }
+    }
+
     // Override Function For Back Button
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         when (item.itemId) {

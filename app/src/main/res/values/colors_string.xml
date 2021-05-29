@@ -11,4 +11,13 @@
         <item>Light Blue - White</item>
         <item>Dark Blue - White</item>
     </string-array>
+    <string-array name="font_string">
+        <item>KoHo</item>
+        <item>Roboto</item>
+        <item>Varela Round</item>
+        <item>Open Sans</item>
+        <item>Oxygen Mono</item>
+        <item>Pt Sans</item>
+    </string-array>
 </resources>
+
